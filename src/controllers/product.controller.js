@@ -1,87 +1,97 @@
 const Product = require('../models/product.model')
+const handleError = require('../helpers/handleError.helper')
 
 const getProducts = async (req, res) => {
-	try {
-		const products = await Product.find()
-		res.status(200).json(products)
-	} catch (error) {
-		res.status(500).json({ message: 'Error al obtener los productos', error })
-	}
+  try {
+    const products = await Product.find()
+    return res.status(200).json(products)
+  } catch (error) {
+    return handleError(res, 500, error)
+  }
 }
 
 const getProductById = async (req, res) => {
-	try {
-		const { id } = req.params
-		const product = await Product.findById(id)
+  try {
+    const { id } = req.params
+    const product = await Product.findById(id)
 
-		if (!product) {
-			res.status(404).json({
-				message: 'Error al buscar producto',
-				error: 'Producto no encontrado en la base de datos',
-			})
-		}
+    if (!product) {
+      return handleError(
+        res,
+        404,
+        Array({
+          msg: 'Producto no encontrado en la base de datos',
+        }),
+      )
+    }
 
-		res.status(200).json(product)
-	} catch (error) {
-		res.status(500).json({ message: 'Error al obtener el producto', error })
-	}
+    return res.status(200).json(product)
+  } catch (error) {
+    return handleError(res, 500, error)
+  }
 }
 
 const createProduct = async (req, res) => {
-	try {
-		const { name, description, price, details } = req.body
-		const newProduct = new Product({ name, description, price, details })
+  try {
+    const { name, description, price, details } = req.body
+    const newProduct = new Product({ name, description, price, details })
 
-		await newProduct.save()
-		res.status(201).json(newProduct)
-	} catch (error) {
-		res.status(500).json({ message: 'Error al crear el producto', error })
-	}
+    await newProduct.save()
+    return res.status(201).json(newProduct)
+  } catch (error) {
+    return handleError(res, 500, error)
+  }
 }
 
 const updateProduct = async (req, res) => {
-	try {
-		const { id } = req.params
-		const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
-			new: true,
-			runValidators: true,
-		})
+  try {
+    const { id } = req.params
+    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    })
 
-		if (!updatedProduct) {
-			res.status(404).json({
-				message: 'Error al actualizar producto',
-				error: 'Producto no encontrado en la base de datos',
-			})
-		}
+    if (!updatedProduct) {
+      return handleError(
+        res,
+        404,
+        Array({
+          msg: 'Producto no encontrado en la base de datos',
+        }),
+      )
+    }
 
-		res.status(200).json(updatedProduct)
-	} catch (error) {
-		res.status(500).json({ message: 'Error al actualizar el producto', error })
-	}
+    return res.status(200).json(updatedProduct)
+  } catch (error) {
+    return handleError(res, 500, error)
+  }
 }
 
 const deleteProduct = async (req, res) => {
-	try {
-		const { id } = req.params
-		const deletedProduct = await Product.findByIdAndDelete(id)
+  try {
+    const { id } = req.params
+    const deletedProduct = await Product.findByIdAndDelete(id)
 
-		if (!deletedProduct) {
-			res.status(404).json({
-				message: 'Error al eliminar producto',
-				error: 'Producto no encontrado en la base de datos',
-			})
-		}
+    if (!deletedProduct) {
+      return handleError(
+        res,
+        404,
+        Array({
+          msg: 'Producto no encontrado en la base de datos',
+        }),
+      )
+    }
 
-		res.status(200).json({ message: 'Producto eliminado exitosamente' })
-	} catch (error) {
-		res.status(500).json({ message: 'Error al eliminar el producto', error })
-	}
+    return res.status(200).json({ message: 'Producto eliminado exitosamente' })
+  } catch (error) {
+    return handleError(res, 500, error)
+  }
 }
 
 module.exports = {
-	getProducts,
-	getProductById,
-	createProduct,
-	updateProduct,
-	deleteProduct,
+  getProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 }
