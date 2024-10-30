@@ -6,6 +6,7 @@ const registerAdminValidator = [
   check('password')
     .isLength({ min: 6 })
     .withMessage('La contraseña debe tener al menos 6 caracteres'),
+  check('role').isIn(['ROLE_ADMIN']).withMessage('Especifique el tipo de rol'),
 
   (req, res, next) => {
     validateResult(req, res, next)
