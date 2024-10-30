@@ -19,11 +19,7 @@ const adminLogin = async (req, res) => {
 
     return res.status(201).json({ token })
   } catch (error) {
-    return handleError(
-      res,
-      error.message === 'Credenciales incorrectas' ? 401 : 500,
-      [{ msg: error.message }],
-    )
+    return handleError(res, Array({ message: error.message }))
   }
 }
 
@@ -41,11 +37,7 @@ const adminRegister = async (req, res) => {
     await newAdmin.save()
     return res.status(200).json({ msg: 'Administrado creado con éxito' })
   } catch (error) {
-    return handleError(
-      res,
-      error.message === 'El usuario ya existe' ? 401 : 500,
-      [{ msg: error.message }],
-    )
+    return handleError(res, Array({ message: error.message }))
   }
 }
 

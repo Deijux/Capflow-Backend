@@ -6,7 +6,7 @@ const getProducts = async (req, res) => {
     const products = await Product.find()
     return res.status(200).json(products)
   } catch (error) {
-    return handleError(res, 500, [{ msg: error.message }])
+    return handleError(res, Array({ message: error.message }))
   }
 }
 
@@ -21,13 +21,7 @@ const getProductById = async (req, res) => {
 
     return res.status(200).json(product)
   } catch (error) {
-    return handleError(
-      res,
-      error.message === 'Producto no encontrado en la base de datos'
-        ? 404
-        : 500,
-      [{ msg: error.message }],
-    )
+    return handleError(res, Array({ message: error.message }))
   }
 }
 
@@ -39,7 +33,7 @@ const createProduct = async (req, res) => {
     await newProduct.save()
     return res.status(201).json(newProduct)
   } catch (error) {
-    return handleError(res, 500, [{ msg: error.message }])
+    return handleError(res, Array({ message: error.message }))
   }
 }
 
@@ -57,13 +51,7 @@ const updateProduct = async (req, res) => {
 
     return res.status(200).json(updatedProduct)
   } catch (error) {
-    return handleError(
-      res,
-      error.message === 'Producto no encontrado en la base de datos'
-        ? 404
-        : 500,
-      [{ msg: error.message }],
-    )
+    return handleError(res, Array({ message: error.message }))
   }
 }
 
@@ -78,13 +66,7 @@ const deleteProduct = async (req, res) => {
 
     return res.status(200).json({ message: 'Producto eliminado exitosamente' })
   } catch (error) {
-    return handleError(
-      res,
-      error.message === 'Producto no encontrado en la base de datos'
-        ? 404
-        : 500,
-      [{ msg: error.message }],
-    )
+    return handleError(res, Array({ message: error.message }))
   }
 }
 

@@ -5,14 +5,14 @@ const authMiddleware = (req, res, next) => {
   const token = req.header('Authorization')?.split(' ')[1]
 
   if (!token)
-    return handleError(res, 401, [{ msg: 'Acceso denegado. No hay token.' }])
+    return handleError(res, Array({ message: 'Token no válido o expirado' }))
 
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET)
     req.admin = verified
     next()
   } catch {
-    return handleError(res, 401, [{ msg: 'Token no válido o expirado.' }])
+    return handleError(res, Array({ message: 'Token no válido o expirado' }))
   }
 }
 
