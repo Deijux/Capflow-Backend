@@ -1,12 +1,12 @@
 const { validationResult } = require('express-validator')
-const { httpError } = require('../helpers/handleError.helper')
+const { handleError } = require('../helpers/handleError.helper')
 
 const validateResult = (req, res, next) => {
   try {
     validationResult(req).throw()
     return next()
   } catch (error) {
-    return httpError(res, 403, error.array())
+    return handleError(res, 403, [{ msg: error }])
   }
 }
 
