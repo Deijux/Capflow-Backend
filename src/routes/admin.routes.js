@@ -1,12 +1,13 @@
 const express = require('express')
 const router = express.Router()
+const { authMiddleware } = require('../middlewares/auth.middleware')
+const { adminLogin, adminRegister } = require('../controllers/admin.controller')
 const {
   registerAdminValidator,
   loginAdminValidator,
 } = require('../validators/admin.validator')
-const { adminLogin, adminRegister } = require('../controllers/admin.controller')
 
-router.post('/register', registerAdminValidator, adminRegister)
+router.post('/register', authMiddleware, registerAdminValidator, adminRegister)
 router.post('/login', loginAdminValidator, adminLogin)
 
 module.exports = router
