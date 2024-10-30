@@ -13,11 +13,17 @@ const adminLogin = async (req, res) => {
     const isMatch = await bcrypt.compare(password, login.password)
     if (!isMatch) throw new Error('Credenciales incorrectas')
 
-    const token = jwt.sign({ id: login._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: login._id }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     })
 
-    return res.status(201).json({ token })
+    return res
+      .cookie('access_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+      })
+      .status(201)
+      .json({ message: 'Inicio de sesión realizado correctamente' })
   } catch (error) {
     return handleError(res, Array({ message: error.message }))
   }
@@ -35,7 +41,7 @@ const adminRegister = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10)
     const newAdmin = new Admin({ username, password: hashedPassword })
     await newAdmin.save()
-    return res.status(200).json({ msg: 'Administrado creado con éxito' })
+    return res.status(200).json({ message: 'Administrador creado con éxito' })
   } catch (error) {
     return handleError(res, Array({ message: error.message }))
   }

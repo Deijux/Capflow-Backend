@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const { handleError } = require('../helpers/handleError.helper')
 
 const authMiddleware = (req, res, next) => {
-  const token = req.header('Authorization')?.split(' ')[1]
+  const token = req.cookies.access_token
 
   if (!token)
     return handleError(res, Array({ message: 'Token no válido o expirado' }))
