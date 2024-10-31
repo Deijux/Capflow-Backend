@@ -1,4 +1,5 @@
 const Product = require('../models/product.model')
+const cloudinary = require('../config/cloudinary.config')
 const { handleError } = require('../helpers/handleError.helper')
 
 const getProducts = async (req, res) => {
@@ -28,7 +29,32 @@ const getProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, details } = req.body
-    const newProduct = new Product({ name, description, price, details })
+
+    const urls = []
+
+    // Catch 1 by 1 to send a Cloudinary
+    for (const file of req.files) {
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader
+          .upload_stream(
+            { folder: 'productos', resource_type: 'image' },
+            (error, result) => {
+              if (error) reject(error)
+              else resolve(result)
+            },
+          )
+          .end(file.buffer)
+      })
+      urls.push(result.secure_url)
+    }
+
+    const newProduct = new Product({
+      name,
+      description,
+      price,
+      imagesUrl: urls,
+      details,
+    })
 
     await newProduct.save()
     return res.status(201).json(newProduct)
