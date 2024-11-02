@@ -11,8 +11,8 @@ const {
   deleteProduct,
 } = require('../controllers/product.controller')
 
-router.get('/', authMiddleware, getProducts)
-router.get('/:id', authMiddleware, getProductById)
+router.get('/', getProducts)
+router.get('/:id', getProductById)
 router.post(
   '/',
   authMiddleware,
