@@ -27,7 +27,10 @@ const adminLogin = async (req, res) => {
         secure: process.env.NODE_ENV === 'production',
       })
       .status(201)
-      .json({ message: 'Inicio de sesión realizado correctamente' })
+      .json({
+        message: 'Inicio de sesión realizado correctamente',
+        role: login.role,
+      })
   } catch (error) {
     return handleError(res, Array({ message: error.message }))
   }
