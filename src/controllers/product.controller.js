@@ -28,7 +28,7 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, details } = req.body
+    const { name, description, price, brand, details } = req.body
 
     const urls = []
 
@@ -52,6 +52,7 @@ const createProduct = async (req, res) => {
       name,
       description,
       price,
+      brand,
       imagesUrl: urls,
       details,
     })
