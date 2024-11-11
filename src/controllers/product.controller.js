@@ -26,6 +26,22 @@ const getProductById = async (req, res) => {
   }
 }
 
+const getProductByBrand = async (req, res) => {
+  try {
+    const { brand } = req.params
+    const products = await Product.find({
+      brand: { $regex: new RegExp(`^${brand}$`, 'i') },
+    })
+
+    if (products.length <= 0)
+      throw new Error('Productos no encontrado en la base de datos')
+
+    return res.status(200).json(products)
+  } catch (error) {
+    return handleError(res, Array({ message: error.message }))
+  }
+}
+
 const createProduct = async (req, res) => {
   try {
     const { name, description, price, brand, details } = req.body
@@ -100,6 +116,7 @@ const deleteProduct = async (req, res) => {
 module.exports = {
   getProducts,
   getProductById,
+  getProductByBrand,
   createProduct,
   updateProduct,
   deleteProduct,
