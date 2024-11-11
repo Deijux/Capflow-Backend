@@ -6,6 +6,7 @@ const { authMiddleware } = require('../middlewares/auth.middleware')
 const {
   getProducts,
   getProductById,
+  getProductByBrand,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -13,6 +14,7 @@ const {
 
 router.get('/', getProducts)
 router.get('/:id', getProductById)
+router.get('/brand/:brand', getProductByBrand)
 router.post(
   '/',
   authMiddleware,
