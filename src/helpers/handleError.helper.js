@@ -1,4 +1,5 @@
 const notFoundMessages = ['Producto no encontrado en la base de datos']
+const errorValidation = ['El campo details debe ser un array JSON válido']
 const loginMessages = [
   'Credenciales incorrectas',
   'El usuario ya existe',
@@ -14,6 +15,9 @@ const handleError = (res, error, status) => {
     }
     if (loginMessages.includes(error.message)) {
       return 401
+    }
+    if (errorValidation.includes(error.message)) {
+      return 400
     }
     return 500
   }

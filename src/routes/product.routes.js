@@ -3,6 +3,7 @@ const router = express.Router()
 const upload = require('../middlewares/multer.middleware')
 const { validateProduct } = require('../validators/products.validator')
 const { authMiddleware } = require('../middlewares/auth.middleware')
+const parseDetails = require('../middlewares/parsDetails.middleware')
 const {
   getProducts,
   getProductById,
@@ -19,6 +20,7 @@ router.post(
   '/',
   authMiddleware,
   upload.array('images', 5),
+  parseDetails,
   validateProduct,
   createProduct,
 )
