@@ -42,6 +42,25 @@ const getProductByBrand = async (req, res) => {
   }
 }
 
+const getAllProductByBrand = async (req, res) => {
+  try {
+    const products = await Product.find()
+    const productsByBrand = products.reduce((acc, product) => {
+      const { brand } = product
+      if (!acc[brand]) {
+        acc[brand] = []
+      }
+      acc[brand].push(product)
+      return acc
+    }, {})
+
+    return res.status(200).json(productsByBrand)
+  } catch (error) {
+    console.error('Error al obtener los productos:', error)
+    return res.status(500).json({ message: 'Error al obtener los productos' })
+  }
+}
+
 const createProduct = async (req, res) => {
   const urls = []
   const publicIds = []
@@ -122,6 +141,7 @@ module.exports = {
   getProducts,
   getProductById,
   getProductByBrand,
+  getAllProductByBrand,
   createProduct,
   updateProduct,
   deleteProduct,

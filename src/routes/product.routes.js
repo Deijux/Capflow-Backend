@@ -5,15 +5,15 @@ const { validateProduct } = require('../validators/products.validator')
 const { authMiddleware } = require('../middlewares/auth.middleware')
 const parseDetails = require('../middlewares/parsDetails.middleware')
 const {
-  getProducts,
   getProductById,
   getProductByBrand,
+  getAllProductByBrand,
   createProduct,
   updateProduct,
   deleteProduct,
 } = require('../controllers/product.controller')
 
-router.get('/', getProducts)
+router.get('/', getAllProductByBrand)
 router.get('/:id', getProductById)
 router.get('/brand/:brand', getProductByBrand)
 router.post(
