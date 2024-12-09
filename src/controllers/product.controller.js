@@ -43,10 +43,11 @@ const getProductByBrand = async (req, res) => {
 }
 
 const createProduct = async (req, res) => {
+  const urls = []
+  const publicIds = []
+
   try {
     const { name, description, price, brand, details } = req.body
-
-    const urls = []
 
     // Catch 1 by 1 to send a Cloudinary
     for (const file of req.files) {
@@ -61,6 +62,7 @@ const createProduct = async (req, res) => {
           )
           .end(file.buffer)
       })
+      publicIds.push(result.public_id)
       urls.push(result.secure_url)
     }
 
@@ -76,6 +78,9 @@ const createProduct = async (req, res) => {
     await newProduct.save()
     return res.status(201).json(newProduct)
   } catch (error) {
+    for (const publicId of publicIds) {
+      await cloudinary.uploader.destroy(publicId)
+    }
     return handleError(res, Array({ message: error.message }))
   }
 }
