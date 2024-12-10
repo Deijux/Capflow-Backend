@@ -15,6 +15,8 @@ const productSchema = new Schema({
   details: { type: [detailSchema], required: true },
 })
 
+productSchema.index({ brand: 1 })
+
 const Product = model('Product', productSchema)
 
 module.exports = Product
