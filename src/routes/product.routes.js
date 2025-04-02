@@ -26,7 +26,14 @@ router.post(
   validateProduct,
   createProduct,
 )
-router.put('/:id', authMiddleware, validateProduct, updateProduct)
+router.put(
+  '/:id',
+  authMiddleware,
+  upload.array('images', 5),
+  parseDetails,
+  validateProduct,
+  updateProduct,
+)
 router.delete('/:id', authMiddleware, deleteProduct)
 
 module.exports = router
