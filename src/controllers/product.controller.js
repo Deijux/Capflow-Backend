@@ -105,12 +105,46 @@ const createProduct = async (req, res) => {
 }
 
 const updateProduct = async (req, res) => {
+  const urls = []
+  const publicIds = []
   try {
     const { id } = req.params
-    const updatedProduct = await Product.findByIdAndUpdate(id, req.body, {
-      new: true,
-      runValidators: true,
-    })
+    const productData = JSON.parse(req.body.product)
+    const { name, description, price, brand, details, existingImages } =
+      productData
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream({ folder: 'productos' }, (error, result) => {
+              if (error) reject(error)
+              else resolve(result)
+            })
+            .end(file.buffer)
+        })
+        publicIds.push(result.public_id)
+        urls.push(result.secure_url)
+      }
+    }
+
+    const allImages = [...existingImages, ...urls]
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      {
+        name,
+        description,
+        price,
+        brand,
+        imagesUrl: allImages,
+        details,
+      },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
 
     if (!updatedProduct) {
       throw new Error('Producto no encontrado en la base de datos')
@@ -118,6 +152,9 @@ const updateProduct = async (req, res) => {
 
     return res.status(200).json(updatedProduct)
   } catch (error) {
+    for (const publicId of publicIds) {
+      await cloudinary.uploader.destroy(publicId).catch(console.error)
+    }
     return handleError(res, Array({ message: error.message }))
   }
 }
