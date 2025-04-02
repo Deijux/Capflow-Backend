@@ -2,6 +2,22 @@ const { check } = require('express-validator')
 const { validateResult } = require('../helpers/validate.helpers')
 
 const validateProduct = [
+  (req, res, next) => {
+    try {
+      if (req.body.product) {
+        const parsedProduct = JSON.parse(req.body.product)
+        req.body = { ...req.body, ...parsedProduct }
+      }
+      next()
+    } catch {
+      return res.status(400).json({
+        success: false,
+        message: 'Error al procesar los datos del producto',
+        errors: [{ message: 'Formato de datos inválido' }],
+      })
+    }
+  },
+
   check('name').notEmpty().withMessage('El nombre es obligatorio'),
   check('description').notEmpty().withMessage('La descripción es obligatoria'),
   check('price')
