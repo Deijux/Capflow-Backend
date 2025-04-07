@@ -37,6 +37,22 @@ const adminLogin = async (req, res) => {
   }
 }
 
+const adminLogout = async (req, res) => {
+  try {
+    res
+      .clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'None',
+      })
+      .status(200)
+      .json({ message: 'Cierre de sesión realizado correctamente' })
+    return res
+  } catch (error) {
+    return handleError(res, Array({ message: error.message }))
+  }
+}
+
 const adminRegister = async (req, res) => {
   try {
     const { username, password, role } = req.body
@@ -57,5 +73,6 @@ const adminRegister = async (req, res) => {
 
 module.exports = {
   adminLogin,
+  adminLogout,
   adminRegister,
 }
