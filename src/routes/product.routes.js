@@ -15,6 +15,7 @@ const {
 } = require('../controllers/product.controller')
 
 router.get('/', getProducts)
+router.get('/admin', authMiddleware, getProducts)
 router.get('/listed', getAllProductByBrand)
 router.get('/:id', getProductById)
 router.get('/brand/:brand', getProductByBrand)
