@@ -3,8 +3,16 @@ const cloudinary = require('../config/cloudinary.config')
 const { handleError } = require('../helpers/handleError.helper')
 
 const getProducts = async (req, res) => {
+  const { q } = req.query
   try {
-    const products = await Product.find()
+    let products = await Product.find()
+    if (q) {
+      const regex = new RegExp(q, 'i')
+      products = products.filter(
+        product =>
+          product.name.match(regex) || product.description.match(regex),
+      )
+    }
     return res.status(200).json(products)
   } catch (error) {
     return handleError(res, Array({ message: error.message }))
