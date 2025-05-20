@@ -1,6 +1,7 @@
 const Product = require('../models/product.model')
 const cloudinary = require('../config/cloudinary.config')
 const { handleError } = require('../helpers/handleError.helper')
+const { orderProducts } = require('../helpers/orderProducts.helper')
 
 const getProducts = async (req, res) => {
   const { q } = req.query
@@ -51,18 +52,18 @@ const getProductByBrand = async (req, res) => {
 }
 
 const getAllProductByBrand = async (req, res) => {
+  const { q } = req.query
   try {
-    const products = await Product.find()
-    const productsByBrand = products.reduce((acc, product) => {
-      const { brand } = product
-      if (!acc[brand]) {
-        acc[brand] = []
-      }
-      acc[brand].push(product)
-      return acc
-    }, {})
-
-    return res.status(200).json(productsByBrand)
+    let products = await Product.find()
+    if (q) {
+      const regex = new RegExp(q, 'i')
+      products = products.filter(
+        product =>
+          product.name.match(regex) || product.description.match(regex),
+      )
+      return res.status(200).json(orderProducts(products))
+    }
+    return res.status(200).json(orderProducts(products))
   } catch (error) {
     console.error('Error al obtener los productos:', error)
     return res.status(500).json({ message: 'Error al obtener los productos' })
