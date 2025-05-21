@@ -11,7 +11,9 @@ const getProducts = async (req, res) => {
       const regex = new RegExp(q, 'i')
       products = products.filter(
         product =>
-          product.name.match(regex) || product.description.match(regex),
+          product.name.match(regex) ||
+          product.description.match(regex) ||
+          product.brand.match(regex),
       )
     }
     return res.status(200).json(products)
@@ -59,7 +61,9 @@ const getAllProductByBrand = async (req, res) => {
       const regex = new RegExp(q, 'i')
       products = products.filter(
         product =>
-          product.name.match(regex) || product.description.match(regex),
+          product.name.match(regex) ||
+          product.description.match(regex) ||
+          product.brand.match(regex),
       )
       return res.status(200).json(orderProducts(products))
     }
