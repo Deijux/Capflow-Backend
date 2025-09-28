@@ -1,4 +1,5 @@
-const Product = require('../models/product.model')
+const { Op } = require('sequelize')
+const { Product, Detail } = require('../models')
 const cloudinary = require('../config/cloudinary.config')
 const { handleError } = require('../helpers/handleError.helper')
 const { orderProducts } = require('../helpers/orderProducts.helper')
@@ -6,16 +7,20 @@ const { orderProducts } = require('../helpers/orderProducts.helper')
 const getProducts = async (req, res) => {
   const { q } = req.query
   try {
-    let products = await Product.find()
+    let where = {}
     if (q) {
-      const regex = new RegExp(q, 'i')
-      products = products.filter(
-        product =>
-          product.name.match(regex) ||
-          product.description.match(regex) ||
-          product.brand.match(regex),
-      )
+      where = {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${q}%` } },
+          { description: { [Op.iLike]: `%${q}%` } },
+          { brand: { [Op.iLike]: `%${q}%` } },
+        ],
+      }
     }
+    const products = await Product.findAll({
+      where,
+      include: [{ model: Detail, as: 'details' }],
+    })
     return res.status(200).json(products)
   } catch (error) {
     return handleError(res, Array({ message: error.message }))
@@ -25,7 +30,9 @@ const getProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params
-    const product = await Product.findById(id)
+    const product = await Product.findByPk(id, {
+      include: [{ model: Detail, as: 'details' }],
+    })
 
     if (!product) {
       throw new Error('Producto no encontrado en la base de datos')
@@ -40,8 +47,9 @@ const getProductById = async (req, res) => {
 const getProductByBrand = async (req, res) => {
   try {
     const { brand } = req.params
-    const products = await Product.find({
-      brand: { $regex: new RegExp(`^${brand}$`, 'i') },
+    const products = await Product.findAll({
+      where: { brand: { [Op.iLike]: `%${brand}%` } },
+      include: [{ model: Detail, as: 'details' }],
     })
 
     if (products.length <= 0)
@@ -56,17 +64,20 @@ const getProductByBrand = async (req, res) => {
 const getAllProductByBrand = async (req, res) => {
   const { q } = req.query
   try {
-    let products = await Product.find()
+    let where = {}
     if (q) {
-      const regex = new RegExp(q, 'i')
-      products = products.filter(
-        product =>
-          product.name.match(regex) ||
-          product.description.match(regex) ||
-          product.brand.match(regex),
-      )
-      return res.status(200).json(orderProducts(products))
+      where = {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${q}%` } },
+          { description: { [Op.iLike]: `%${q}%` } },
+          { brand: { [Op.iLike]: `%${q}%` } },
+        ],
+      }
     }
+    const products = await Product.findAll({
+      where,
+      include: [{ model: Detail, as: 'details' }],
+    })
     return res.status(200).json(orderProducts(products))
   } catch (error) {
     console.error('Error al obtener los productos:', error)
@@ -98,16 +109,17 @@ const createProduct = async (req, res) => {
       urls.push(result.secure_url)
     }
 
-    const newProduct = new Product({
-      name,
-      description,
-      price,
-      brand,
-      imagesUrl: urls,
-      details,
-    })
-
-    await newProduct.save()
+    const newProduct = await Product.create(
+      {
+        name,
+        description,
+        price,
+        brand,
+        imagesUrl: urls,
+        details: Array.isArray(details) ? details : JSON.parse(details),
+      },
+      { include: [{ model: Detail, as: 'details' }] },
+    )
     return res.status(201).json(newProduct)
   } catch (error) {
     for (const publicId of publicIds) {
@@ -122,7 +134,7 @@ const updateProduct = async (req, res) => {
   const publicIds = []
   try {
     const { id } = req.params
-    const productData = JSON.parse(req.body.product)
+    const productData = req.body
     const { name, description, price, brand, details, existingImages } =
       productData
 
@@ -143,47 +155,58 @@ const updateProduct = async (req, res) => {
 
     const allImages = [...existingImages, ...urls]
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      id,
-      {
-        name,
-        description,
-        price,
-        brand,
-        imagesUrl: allImages,
-        details,
-      },
-      {
-        new: true,
-        runValidators: true,
-      },
-    )
-
-    if (!updatedProduct) {
+    const product = await Product.findByPk(id, {
+      include: [{ model: Detail, as: 'details' }],
+    })
+    if (!product) {
       throw new Error('Producto no encontrado en la base de datos')
     }
+
+    await product.update({
+      name,
+      description,
+      price,
+      brand,
+      imagesUrl: allImages,
+    })
+
+    if (details) {
+      const parsedDetails = Array.isArray(details)
+        ? details
+        : JSON.parse(details)
+
+      await Detail.destroy({ where: { productId: id } })
+      await Detail.bulkCreate(parsedDetails.map(d => ({ ...d, productId: id })))
+    }
+
+    const updatedProduct = await Product.findByPk(id, {
+      include: [{ model: Detail, as: 'details' }],
+    })
 
     return res.status(200).json(updatedProduct)
   } catch (error) {
     for (const publicId of publicIds) {
       await cloudinary.uploader.destroy(publicId).catch(console.error)
     }
-    return handleError(res, Array({ message: error.message }))
+    return handleError(res, Array({ message: 'aqui' + error.message }))
   }
 }
 
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params
-    const deletedProduct = await Product.findByIdAndDelete(id)
 
-    if (!deletedProduct) {
+    const deletedCount = await Product.destroy({
+      where: { id },
+    })
+
+    if (deletedCount === 0) {
       throw new Error('Producto no encontrado en la base de datos')
     }
 
     return res.status(200).json({ message: 'Producto eliminado exitosamente' })
   } catch (error) {
-    return handleError(res, Array({ message: error.message }))
+    return handleError(res, [{ message: error.message }])
   }
 }
 

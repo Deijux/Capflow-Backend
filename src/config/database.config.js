@@ -1,20 +1,16 @@
-const mongoose = require('mongoose')
+const { Sequelize } = require('sequelize')
 
-const connectDB = async () => {
-  try {
-    const uri =
-      process.env.NODE_ENV === 'production'
-        ? process.env.MONGO_URI
-        : process.env.MONGO_URI_DEVELOP
-    if (!uri) {
-      throw new Error('MONGO_URI no está definida en las variables de entorno')
-    }
-    await mongoose.connect(uri, {})
-    console.log('Base de datos conectada')
-  } catch (error) {
-    console.error('Error al conectar la base de datos:', error)
-    process.exit(1)
-  }
-}
+const isProd = process.env.NODE_ENV === 'production'
 
-module.exports = connectDB
+const sequelize = new Sequelize(
+  isProd ? process.env.DB_NAME : process.env.DB_NAME_DEV,
+  isProd ? process.env.DB_USER : process.env.DB_USER_DEV,
+  isProd ? process.env.DB_PASSWORD : process.env.DB_PASSWORD_DEV,
+  {
+    host: isProd ? process.env.DB_HOST : process.env.DB_HOST_DEV,
+    port: isProd ? process.env.DB_PORT : process.env.DB_PORT_DEV,
+    dialect: 'postgres',
+    logging: true,
+  },
+)
+module.exports = sequelize

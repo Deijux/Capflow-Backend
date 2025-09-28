@@ -4,9 +4,9 @@ const { validateResult } = require('../helpers/validate.helpers')
 const validateProduct = [
   (req, res, next) => {
     try {
-      if (req.body.product) {
+      if (req.body.product && typeof req.body.product === 'string') {
         const parsedProduct = JSON.parse(req.body.product)
-        req.body = { ...req.body, ...parsedProduct }
+        req.body = parsedProduct
       }
       next()
     } catch {
@@ -26,16 +26,14 @@ const validateProduct = [
   check('brand').notEmpty().withMessage('La marca es obligatoria'),
   check('details').isArray().withMessage('El campo details debe ser un array'),
   check('details')
-    .custom(value => value.length > 0)
+    .custom(v => v.length > 0)
     .withMessage('El campo details no puede estar vacío'),
   check('details.*.size').notEmpty().withMessage('El tamaño es obligatorio'),
   check('details.*.stock')
     .isInt({ min: 0 })
     .withMessage('El stock debe ser un número entero positivo'),
 
-  (req, res, next) => {
-    validateResult(req, res, next)
-  },
+  (req, res, next) => validateResult(req, res, next),
 ]
 
 module.exports = { validateProduct }
