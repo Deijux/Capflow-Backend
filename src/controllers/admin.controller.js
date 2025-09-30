@@ -25,7 +25,7 @@ const adminLogin = async (req, res) => {
       .cookie('access_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'None',
+        sameSite: 'lax',
       })
       .status(201)
       .json({
@@ -43,7 +43,7 @@ const adminLogout = async (req, res) => {
       .clearCookie('access_token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'None',
+        sameSite: 'lax',
       })
       .status(200)
       .json({ message: 'Cierre de sesión realizado correctamente' })

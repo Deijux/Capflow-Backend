@@ -18,7 +18,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use('/api/products', productsRoutes)
-app.use('/auth', adminRoutes)
+app.use('/api/auth', adminRoutes)
 
 sequelize
   .sync({ alter: true }) // Alter ajusta columnas si cambian los modelos (solo en desarrollo)
