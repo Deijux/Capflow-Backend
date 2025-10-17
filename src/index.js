@@ -2,12 +2,13 @@ const dotenv = require('dotenv')
 const cookieParser = require('cookie-parser')
 const express = require('express')
 const cors = require('cors')
+
+dotenv.config()
 const sequelize = require('./config/database.config')
+
 const corsOptions = require('./config/cors.config')
 const productsRoutes = require('./routes/product.routes')
 const adminRoutes = require('./routes/admin.routes')
-
-dotenv.config()
 
 const app = express()
 
